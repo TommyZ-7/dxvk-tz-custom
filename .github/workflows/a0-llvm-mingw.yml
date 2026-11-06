@@ -15,6 +15,9 @@ env:
   GLSLANG_ARCHIVE: glslang-16.6.0-linux-x86_64-release.tar.gz
   GLSLANG_URL: https://github.com/KhronosGroup/glslang/releases/download/16.6.0/glslang-16.6.0-linux-x86_64-release.tar.gz
   GLSLANG_SHA256: 2c34071f56ecf39d16233294d3739cf43f981fd39080f2fd9dccb782101191ce
+  NINJA_ARCHIVE: ninja-linux.zip
+  NINJA_URL: https://github.com/ninja-build/ninja/releases/download/v1.13.2/ninja-linux.zip
+  NINJA_SHA256: 5749cbc4e668273514150a80e387a957f933c6ed3f5f11e03fb30955e2bbead6
 
 jobs:
   build:
@@ -27,7 +30,16 @@ jobs:
       - name: Install build prerequisites
         run: |
           sudo apt-get update
-          sudo apt-get install -y ninja-build python3-venv xz-utils
+          sudo apt-get install -y python3-venv xz-utils unzip
+
+      - name: Install pinned Ninja
+        run: |
+          curl -L --fail -o "/tmp/${NINJA_ARCHIVE}" "${NINJA_URL}"
+          echo "${NINJA_SHA256}  /tmp/${NINJA_ARCHIVE}" | sha256sum -c -
+          mkdir -p "$RUNNER_TEMP/ninja"
+          unzip -q "/tmp/${NINJA_ARCHIVE}" -d "$RUNNER_TEMP/ninja"
+          chmod +x "$RUNNER_TEMP/ninja/ninja"
+          echo "$RUNNER_TEMP/ninja" >> "$GITHUB_PATH"
 
       - name: Install pinned llvm-mingw
         run: |
