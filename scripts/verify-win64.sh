@@ -6,11 +6,10 @@
 set -euo pipefail
 
 repo_root=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)
-build_dir=${BUILD_DIR:-"$repo_root/build.w64"}
-mingw_prefix=${MINGW_PREFIX:-/home/tommyz7/work-saeki/toolchains/llvm-mingw-20261104-ucrt-ubuntu-22.04-x86_64}
-objdump=${OBJDUMP:-x86_64-w64-mingw32-objdump}
+source "$repo_root/scripts/toolchain-env.sh"
 
-export PATH="$mingw_prefix/bin:$PATH"
+build_dir=${BUILD_DIR:-"$repo_root/build.w64"}
+objdump=${OBJDUMP:-x86_64-w64-mingw32-objdump}
 
 if ! command -v "$objdump" >/dev/null 2>&1; then
   echo "error: $objdump not found (check OBJDUMP / MINGW_PREFIX)" >&2
@@ -39,7 +38,9 @@ check_export() {
   local path=$1
   local name=$2
 
-  if ! "$objdump" -p "$path" | grep -qE "[[:space:]]${name}\$"; then
+  if ! "$objdump" -p "$path" |
+      awk '/Export Address Table|Export Table/{in_export=1} /Import Table/{in_export=0} in_export' |
+      grep -qE "[[:space:]]${name}\$"; then
     echo "   FAIL: missing export $name" >&2
     fail=1
   else
@@ -51,11 +52,11 @@ check_no_dynamic_cxx_runtime() {
   local path=$1
 
   if "$objdump" -p "$path" |
-      grep -qiE 'DLL Name: (libc\+\+|libstdc\+\+-6|libgcc_s_)'; then
+      grep -qiE 'DLL Name: (libc\+\+|libc\+\+abi|libstdc\+\+-6|libgcc_s_|libunwind|libwinpthread-1)'; then
     echo "   FAIL: dynamically linked MinGW C/C++ runtime found" >&2
     fail=1
   else
-    echo "   runtime: statically linked (no libc++/libstdc++/libgcc DLL)"
+    echo "   runtime: statically linked (no libc++/libstdc++/libgcc/libunwind/libwinpthread DLL)"
   fi
 }
 

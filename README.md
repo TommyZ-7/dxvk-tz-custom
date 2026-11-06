@@ -17,14 +17,17 @@ VRS code yet. See [`docs/superpowers/plans/2026-11-06-a0-build.md`](docs/superpo
 and [`NOTICE.md`](NOTICE.md).
 
 Prerequisites: initialized submodules, llvm-mingw 20261104 (UCRT), Meson 1.7.2,
-Ninja, glslang, and Python 3. Set `MINGW_PREFIX` to the llvm-mingw root and
-`MESON` to the Meson executable if they are not on `PATH`.
+Ninja 1.13.2, glslang 16.6.0, and Python 3. Export `MINGW_PREFIX` once;
+export `MESON` if Meson is not on `PATH`. The scripts validate the pinned
+versions and the UCRT toolchain.
 
 ```sh
 git submodule update --init --recursive
-MINGW_PREFIX=/path/to/llvm-mingw-20261104-ucrt-ubuntu-22.04-x86_64 \
-  ./scripts/build-win64.sh
+export MINGW_PREFIX=/path/to/llvm-mingw-20261104-ucrt-ubuntu-22.04-x86_64
+export MESON=/path/to/meson
+./scripts/build-win64.sh
 ./scripts/verify-win64.sh
+./scripts/check-repro.sh   # two clean builds, hash comparison
 ```
 
 The build uses `build-win64-llvm-mingw.txt` with the reference options

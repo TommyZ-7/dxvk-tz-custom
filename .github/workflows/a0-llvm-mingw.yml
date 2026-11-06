@@ -1,0 +1,69 @@
+name: A0 llvm-mingw
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  LLVM_MINGW_ARCHIVE: llvm-mingw-20261104-ucrt-ubuntu-22.04-x86_64.tar.xz
+  LLVM_MINGW_URL: https://github.com/mstorsjo/llvm-mingw/releases/download/20261104/llvm-mingw-20261104-ucrt-ubuntu-22.04-x86_64.tar.xz
+  LLVM_MINGW_SHA256: 919380403de87dca3c581c2053230cd298af5e891286628ba0613b7fed370926
+  GLSLANG_ARCHIVE: glslang-16.6.0-linux-x86_64-release.tar.gz
+  GLSLANG_URL: https://github.com/KhronosGroup/glslang/releases/download/16.6.0/glslang-16.6.0-linux-x86_64-release.tar.gz
+  GLSLANG_SHA256: 2c34071f56ecf39d16233294d3739cf43f981fd39080f2fd9dccb782101191ce
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install build prerequisites
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ninja-build python3-venv xz-utils
+
+      - name: Install pinned llvm-mingw
+        run: |
+          curl -L --fail -o "/tmp/${LLVM_MINGW_ARCHIVE}" "${LLVM_MINGW_URL}"
+          echo "${LLVM_MINGW_SHA256}  /tmp/${LLVM_MINGW_ARCHIVE}" | sha256sum -c -
+          mkdir -p "$RUNNER_TEMP/toolchains"
+          tar -xJf "/tmp/${LLVM_MINGW_ARCHIVE}" -C "$RUNNER_TEMP/toolchains"
+          echo "MINGW_PREFIX=$RUNNER_TEMP/toolchains/llvm-mingw-20261104-ucrt-ubuntu-22.04-x86_64" >> "$GITHUB_ENV"
+
+      - name: Install pinned glslang
+        run: |
+          curl -L --fail -o "/tmp/${GLSLANG_ARCHIVE}" "${GLSLANG_URL}"
+          echo "${GLSLANG_SHA256}  /tmp/${GLSLANG_ARCHIVE}" | sha256sum -c -
+          mkdir -p "$RUNNER_TEMP/glslang"
+          tar -xzf "/tmp/${GLSLANG_ARCHIVE}" -C "$RUNNER_TEMP/glslang"
+          echo "$RUNNER_TEMP/glslang/bin" >> "$GITHUB_PATH"
+
+      - name: Install pinned Meson
+        run: |
+          python3 -m venv "$RUNNER_TEMP/meson-venv"
+          "$RUNNER_TEMP/meson-venv/bin/pip" install 'meson==1.7.2'
+          echo "MESON=$RUNNER_TEMP/meson-venv/bin/meson" >> "$GITHUB_ENV"
+
+      - name: Build and verify
+        run: |
+          ./scripts/build-win64.sh
+          ./scripts/verify-win64.sh
+
+      - name: Bit-reproducibility check
+        run: ./scripts/check-repro.sh
+
+      - name: Upload DLLs
+        uses: actions/upload-artifact@v4
+        with:
+          name: dxvk-tz-custom-a0-win64
+          path: |
+            build.w64/src/d3d11/d3d11.dll
+            build.w64/src/dxgi/dxgi.dll
+          if-no-files-found: error

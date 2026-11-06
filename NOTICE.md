@@ -7,7 +7,7 @@ DXVK is licensed under the zlib/libpng license; see [`LICENSE`](LICENSE).
 
 - Upstream: `https://github.com/doitsujin/dxvk`
 - A0/A1 base pin: `d30be2baea02a67b9502bffda0ec8b0d915bb3d2`
-  (2026-10-01, DXVK 3.1.1). This is 133 commits behind upstream
+  (2026-10-01, `git describe`: `v3.1.1-55-gd30be2ba`). This is 133 commits behind upstream
   `master` (`cf0a0d90`) as of 2026-11-06. Forward-porting to current
   master is a separate later change.
 - VRS reference:
