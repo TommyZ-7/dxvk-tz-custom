@@ -23,6 +23,13 @@ The reference repository separates its licensing as follows:
   **That WiVRn patch is not copied into this repository and must not be
   used here.**
 
-A0 does not include or enable the reference VRS patch. A1 will adapt the
-reference's fixed-centre VRS path and record the resulting modifications
-in this notice.
+A0 does not include or enable the reference VRS patch.
+
+A1 imports the reference DXVK patch at the pinned base. The new
+`src/dxvk/dxvk_gaze_vrs.{cpp,h}` and `src/dxvk/dxvk_gaze_dot.h` files, and
+the DXVK integration edits, are derived from that patch (Zlib/libpng). The
+reference's fixed-centre mode is used for the A1 smoke path. A2 replaces
+the WiVRn shared-memory gaze reader with the `vrs.json` centres and records
+the resulting modifications here.
+
+The WiVRn patch remains excluded.
