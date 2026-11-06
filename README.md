@@ -8,6 +8,32 @@ The most recent development builds can be found [here](https://github.com/doitsu
 
 Release builds can be found [here](https://github.com/doitsujin/dxvk/releases).
 
+## tz-custom fork: A0 build foundation
+
+This fork is pinned to DXVK commit `d30be2ba` for the tz-custom
+variable-rate-shading work. A0 only establishes a reproducible Windows x64
+MinGW cross-build of `d3d11.dll` and `dxgi.dll`; it does **not** contain any
+VRS code yet. See [`docs/superpowers/plans/2026-11-06-a0-build.md`](docs/superpowers/plans/2026-11-06-a0-build.md)
+and [`NOTICE.md`](NOTICE.md).
+
+Prerequisites: initialized submodules, llvm-mingw 20261104 (UCRT), Meson 1.7.2,
+Ninja, glslang, and Python 3. Set `MINGW_PREFIX` to the llvm-mingw root and
+`MESON` to the Meson executable if they are not on `PATH`.
+
+```sh
+git submodule update --init --recursive
+MINGW_PREFIX=/path/to/llvm-mingw-20261104-ucrt-ubuntu-22.04-x86_64 \
+  ./scripts/build-win64.sh
+./scripts/verify-win64.sh
+```
+
+The build uses `build-win64-llvm-mingw.txt` with the reference options
+`-Dbuildtype=release -Denable_d3d8=false -Denable_d3d9=false -Denable_d3d10=false`.
+Artifacts:
+
+- `build.w64/src/d3d11/d3d11.dll`
+- `build.w64/src/dxgi/dxgi.dll`
+
 ## How to use
 In order to install a DXVK package obtained from the [release](https://github.com/doitsujin/dxvk/releases) page into a given wine prefix, copy or symlink the DLLs into the following directories as follows, then open `winecfg` and manually add `native` DLL overrides for `d3d8`, `d3d9`, `d3d10core`, `d3d11` and `dxgi` under the Libraries tab.
 
