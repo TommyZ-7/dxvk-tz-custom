@@ -11,10 +11,21 @@ Release builds can be found [here](https://github.com/doitsujin/dxvk/releases).
 ## tz-custom fork: A0 build foundation
 
 This fork is pinned to DXVK commit `d30be2ba` for the tz-custom
-variable-rate-shading work. A0 only establishes a reproducible Windows x64
-MinGW cross-build of `d3d11.dll` and `dxgi.dll`; it does **not** contain any
-VRS code yet. See [`docs/superpowers/plans/2026-11-06-a0-build.md`](docs/superpowers/plans/2026-11-06-a0-build.md)
+variable-rate-shading work. A0 establishes a reproducible Windows x64 MinGW
+cross-build of `d3d11.dll` and `dxgi.dll`. A1 imports the
+`vrchat-dfr-linux` DXVK VRS patch as the working baseline and uses its
+`DXVK_GAZE_FAKE=fixed` mode for a fixed-centre smoke path. A2 will replace
+the WiVRn shared-memory gaze input with the `vrs.json` settings. See
+[`docs/superpowers/plans/2026-11-06-a0-build.md`](docs/superpowers/plans/2026-11-06-a0-build.md),
+[`docs/superpowers/plans/2026-11-06-a1-vrs-fixed-center.md`](docs/superpowers/plans/2026-11-06-a1-vrs-fixed-center.md),
 and [`NOTICE.md`](NOTICE.md).
+
+A1 fixed-centre smoke:
+
+```sh
+DXVK_GAZE_VRS=1 DXVK_GAZE_FMT=97 DXVK_GAZE_FLIP_Y=1 \
+DXVK_GAZE_FAKE=fixed DXVK_GAZE_FIXED_Y=0.5 DXVK_GAZE_COARSE=auto
+```
 
 Prerequisites: initialized submodules, llvm-mingw 20261104 (UCRT), Meson 1.7.2,
 Ninja 1.13.2, glslang 16.6.0, and Python 3. Export `MINGW_PREFIX` once;
